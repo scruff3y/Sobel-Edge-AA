@@ -1,14 +1,18 @@
 % Simple blur: average of colour values around each pixel.
-% Really slow; need to rewrite using matrix ops.
 
 function blurred = simpleBlur(image, blurSize)
-    blurred = image;
+    sizeRows = size(image, 1);
+    sizeCols = size(image, 2);
     
-    for chl = 1:size(image, 3);
-        for col = blurSize+1:size(image, 2)-blurSize
-            for row = blurSize+1:size(image, 1)-blurSize
-                blurred(row, col, chl) = (sum(sum(image(row-blurSize:row+blurSize, col-blurSize:col+blurSize, chl)))) / (((blurSize*2) + 1)^2);
-            end
+    overBuffer = zeros(sizeRows+(blurSize*2), sizeCols+(blurSize*2), size(image, 3));
+    
+    for row = 1:blurSize+1
+        for col = 1:blurSize+1
+            overBuffer(row:row+sizeRows-1, col:col+sizeCols-1, :) = overBuffer(row:row+sizeRows-1, col:col+sizeCols-1, :) + image;
         end
     end
+    
+    overBuffer = overBuffer ./ ((blurSize+1)^2);
+    
+    blurred = overBuffer(blurSize:blurSize+sizeRows, blurSize:blurSize+sizeCols, :);
 end
