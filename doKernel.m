@@ -1,19 +1,18 @@
-% Runs kernel over each pixel in the image.
-% Edge pixels are not computed.
-
-% 'kernel' must be 2D.
-% NB: I suppose the kernel *could* be 3D, but I stuck with 2D for now to simplify.
+% Convolutes kernel over image.
 
 function imageDelta = doKernel(kernel, image)
-    imageDelta = image;
+    imageRows = size(image, 1);
+    imageCols = size(image, 2);
+    kernelRows = size(kernel, 1);
+    kernelCols = size(kernel, 2);
+
+    overBuffer = zeros(imageRows + (2*kernelRows), imageCols + (2*kernelCols), size(image, 3));
     
-    numcols = (size(kernel, 2) - 1)/2;
-    numrows = (size(kernel, 1) - 1)/2;
-    
-    for col = numcols+1:size(image, 2)-1;
-        for row = numrows+1:size(image, 1)-1;
-            multipliedValues = kernel .* image(row-1:row+1, col-1:col+1);
-            imageDelta(row, col) = sum(sum(multipliedValues)) ./ (numrows*numcols);
+    for row = 1:kernelCols
+        for col = 1:kernelCols
+            overBuffer(row:row+imageRows-1, col:col+imageCols-1, :) = overBuffer(row:row+imageRows-1, col:col+imageCols-1, :) + (kernel(row, col, :) .* image);
         end
     end
+    
+    imageDelta = overBuffer(kernelRows:kernelRows+imageRows-1, kernelCols:kernelCols+imageCols-1, :) ./ (kernelRows*kernelCols);
 end
