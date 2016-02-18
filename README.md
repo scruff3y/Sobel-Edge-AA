@@ -10,6 +10,9 @@ The original and blurred images are then mixed together, using the Sobel-filtere
 
 The various parameters can be tweaked in kernels.m
 
+Link to imgur album of b/a because I don't know how to use markdown lol:
+http://imgur.com/a/n3p3j
+
 Plans:
 -
 
