@@ -13,8 +13,4 @@ The various parameters can be tweaked in kernels.m
 Plans:
 -
 
-Modify simpleBlur to take a matrix *or* a number as the radius value. This should allow the blurring and mixing stages to completed in one pass, by blurring each pixel based on it's Sobel value and a parameter.
-
-Modify doKernel to operate on the source, to avoid even more copying.
-
 Modify doKernel and simpleBlur to properly effect edges, probably just by mirroring.
