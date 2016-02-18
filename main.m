@@ -1,40 +1,61 @@
-% init
-clear all;
+% Runs over the image with the small kernel size, using standard sobel
+% kernels of size 3.
+
 close all;
+clear;
 
-% loads kernels and other parameters.
-kernels;
+% X-direction kernel (horizontal)
+Gx = [
+    -1,   0,  1;
+    -2,   0,  2;
+    -1,   0,  1
+];
 
-% Read in source image.
-sourceImage = imread('./testimages/unnamed.jpg');
+% Y-direction kernel (vertical)
+Gy = [
+     1,   2,  1;
+     0,   0,  0;
+    -1,  -2, -1
+];
 
+sourceEdgeBlur = 1;
+mixBlur = 3;
+
+% Sets strength of sobel output. Grows with 'n'.
+edgeDetectStrength = 2;
+
+% Sets weight of sobel output. Grows with '^n'
+edgeDetectWeight = 3;
+
+% -------------------------------------------------------------------------
+
+% Read source image.
+sourceImage = imread('./testimages/image3.png');
+
+% Create greyscale copy and convert to double.
 grayImage = rgb2gray(sourceImage);
-
 grayImage = im2double(grayImage);
 
-% Compute Sobel.
+% Simple blur to reduce noise.
+grayImage = simpleBlur(grayImage, sourceEdgeBlur);
+
+% Edge-detect.
 xAxisEdge = doKernel(Gx, grayImage);
 yAxisEdge = doKernel(Gy, grayImage);
-edgeImage = sqrt(xAxisEdge.^2 + yAxisEdge.^2);
-sinEdgeImage = edgeImage .* sin(atan(abs(yAxisEdge)./(edgeImage+eps)));
-sobelImage = dryWet(edgeImage, sinEdgeImage, angleMixer);
+combinedEdge = sqrt(xAxisEdge.^2 + yAxisEdge.^2);
 
-% Compute blur.
-blurImage = simpleBlur(sourceImage, blurAmount);
-blurImage = im2double(blurImage);
+% Extrude across all channels and apply strength/weighting.
+combinedEdge(:, :, 2) = combinedEdge;
+combinedEdge(:, :, 3) = combinedEdge(:, :, 1);
+combinedEdge = ((edgeDetectStrength .* combinedEdge) ./ max(max(max(combinedEdge)))).^edgeDetectWeight;
 
-% Apply blur to edges.
-sobel3D(:, :, 1) = sobelImage;
-sobel3D(:, :, 2) = sobelImage;
-sobel3D(:, :, 3) = sobelImage;
-sobel3D = (sobelStrength.*sobel3D) ./ max(max(max(sobel3D))); % Normalise values.
-doubleImage = im2double(sourceImage);
-edgeBlurredImage = dryWet(doubleImage, blurImage, sobel3D);
+% Create blurred copy.
+blurImage = simpleBlur(im2double(sourceImage), mixBlur);
 
-% Writes all steps to file for comparison and debug.
-imwrite(edgeImage, '1_edgeImage.png')
-imwrite(sinEdgeImage, '2_sinEdgeImage.png')
-imwrite(sobelImage, '3_sobelImage.png')
-imwrite(blurImage, '4_blurImage.png')
-imwrite(edgeBlurredImage, '5_edgeBlurredImage.png')
-imwrite(doubleImage, '6_original.png')
+% Dry/wet mix of blurred and source, based on edge-detect
+edgeBlurredImage = dryWet(im2double(sourceImage), blurImage, combinedEdge);
+
+% Write to file.
+imwrite(sourceImage, './smallKernelTestOutput/1_source.png');
+imwrite(edgeBlurredImage, './smallKernelTestOutput/2_edgeBlurredImage.png');
+imwrite(combinedEdge, './smallKernelTestOutput/3_edges.png');
