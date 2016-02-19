@@ -13,4 +13,6 @@ How it works:
 
 Link to imgur album of b/a because I don't know how to use markdown lol: http://imgur.com/a/bXGzl
 
+GIF of before and after: https://gfycat.com/AcclaimedGeneralDolphin
+
 As per usual with edge-detect AA, text is *totally* screwed. This is WiP though, so it might be able to be fixed by tweaking.
