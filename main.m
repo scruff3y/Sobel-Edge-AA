@@ -1,61 +1,85 @@
-% Runs over the image with the small kernel size, using standard sobel
-% kernels of size 3.
+% Main script for an edge-detection based Anti-Aliasing method, written in
+% MATLAB. By; scruff3y, Feb 2016.
 
+% Init workspace.
 close all;
 clear;
 
+% Load kernels.
+kernels;
+
+% =========================================================================
+% ============================= PARAMETERS ================================
+
 % X-direction kernel (horizontal)
-Gx = [
-    -1,   0,  1;
-    -2,   0,  2;
-    -1,   0,  1
-];
+Gx = centreKernel;
 
 % Y-direction kernel (vertical)
-Gy = [
-     1,   2,  1;
-     0,   0,  0;
-    -1,  -2, -1
-];
+Gy = centreKernel;
 
-sourceEdgeBlur = 1;
-mixBlur = 3;
+% This parameter sets the amount of blur applied to the image before the
+% sobel filter is run over it. The aim of this is to reduce the amount of
+% noise. Range: int >= 0;
+preprocessblur = 0;
 
-% Sets strength of sobel output. Grows with 'n'.
-edgeDetectStrength = 2;
+% This parameter sets the amount of blur applied to the edges. Range: int
+% >= 0
+postprocessblur = 1;
 
-% Sets weight of sobel output. Grows with '^n'
-edgeDetectWeight = 3;
+% Brightens the blurred image to preserve highlights.
+brighten = 1.24;
 
-% -------------------------------------------------------------------------
+% Determines the percentage of sin weighting to be applied to sobel filter
+% output. Range: 0 <= decimal <= 1.
+angleMixer = 0;
+
+% Sets weight of sine of edge angle. A higher value means that the angle of
+% an edge must be further from the horizontal or vertical before a blur
+% will be applied. Range: 0 <= decimal.
+sinWeight = 1;
+
+% Sets strength of sobel. Higher value -> greater percentage of blur added
+% to edges. Range: 0 <= decimal.
+edgeDetectStrength = 1.2;
+
+% Sets weighting of sobel output.
+edgeDetectWeight = 1;
+
+% =========================================================================
+% =========================================================================
 
 % Read source image.
-sourceImage = imread('./testimages/image3.png');
+sourceImage = imread('./testimages/image2.png');
 
-% Create greyscale copy and convert to double.
-grayImage = rgb2gray(sourceImage);
-grayImage = im2double(grayImage);
+% Compute Post-process blur.
+sourcePostBlurredImage = simpleBlur(brighten .* im2double(sourceImage), postprocessblur);
 
-% Simple blur to reduce noise.
-grayImage = simpleBlur(grayImage, sourceEdgeBlur);
+% Create greyscale version for sobel.
+grayImage = simpleBlur(im2double(rgb2gray(sourceImage)), preprocessblur);
 
-% Edge-detect.
+% Sobel filter, follwed by angle weighting.
 xAxisEdge = doKernel(Gx, grayImage);
 yAxisEdge = doKernel(Gy, grayImage);
-combinedEdge = sqrt(xAxisEdge.^2 + yAxisEdge.^2);
+combinedAxisEdge = sqrt(xAxisEdge.^2 + yAxisEdge.^2);
+sinAxisEdge = (1 - ((abs(xAxisEdge-yAxisEdge)+eps) ./ ((max(max(xAxisEdge-yAxisEdge)))+eps))) .^ sinWeight;
+% This is because the more vertical or horizontal an edge is, the less
+% blurring is needed. (does nothing for omni directional kernels).
 
-% Extrude across all channels and apply strength/weighting.
-combinedEdge(:, :, 2) = combinedEdge;
-combinedEdge(:, :, 3) = combinedEdge(:, :, 1);
-combinedEdge = ((edgeDetectStrength .* combinedEdge) ./ max(max(max(combinedEdge)))).^edgeDetectWeight;
+% Mix combine and sin, then apply parameter weighting.
+combined = dryWet(combinedAxisEdge, (combinedAxisEdge.*sinAxisEdge), angleMixer);
+combined = ((edgeDetectStrength .* combined) ./ max(max(combined))) .^ edgeDetectWeight;
 
-% Create blurred copy.
-blurImage = simpleBlur(im2double(sourceImage), mixBlur);
+% Extrude combination to 3D
+combined(:, :, 2) = combined;
+combined(:, :, 3) = combined(:, :, 1);
 
-% Dry/wet mix of blurred and source, based on edge-detect
-edgeBlurredImage = dryWet(im2double(sourceImage), blurImage, combinedEdge);
+% Apply edge blur using dry-wet mix of source and blur, with sobel filter
+% to determine mix percentage.
+edgeBlurredImage = dryWet(im2double(sourceImage), sourcePostBlurredImage, combined);
 
-% Write to file.
-imwrite(sourceImage, './smallKernelTestOutput/1_source.png');
-imwrite(edgeBlurredImage, './smallKernelTestOutput/2_edgeBlurredImage.png');
-imwrite(combinedEdge, './smallKernelTestOutput/3_edges.png');
+% Dump output and various stages of completion to file.
+imwrite(combinedAxisEdge ./ max(max(combinedAxisEdge)), '1_raw filter output (normalised).png');
+imwrite(sinAxisEdge, '2_angle filter.png');
+imwrite(combined, '3_final filter output.png');
+imwrite(sourceImage, '4_source.png');
+imwrite(edgeBlurredImage, '5_edged.png');

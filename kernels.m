@@ -1,26 +1,78 @@
-% Definition of kernels in x and y.
-% For now, these will be simple 1  0 -1
+% Definition of a variety of kernels for convolution over an image. Set Gx
+% and Gy in main.m to one of these.
 
-% X-direction kernel (horizontal)
-Gx = [
+% Default Sobel operator kernels.
+defaultSobelX = [
+    -1,   0,  1;
+    -2,   0,  2;
+    -1,   0,  1
+];
+
+defaultSobelY = [
+     1,   2,  1;
+     0,   0,  0;
+    -1,  -2, -1
+];
+
+% Inverted Sobel operator kernels.
+invertedSobelX = [
+    -1,   0,  1;
+    -0.5,   0,  0.5;
+    -1,   0,  1
+];
+
+invertedSobelY = [
+     1,   0.5,  1;
+     0,   0,  0;
+    -1,  -0.5, -1
+];
+
+% Small isotropic kernels.
+smallIsoX = [
     -1,   0,  1;
     -1,   0,  1;
     -1,   0,  1
 ];
 
-% Y-direction kernel (vertical)
-Gy = [
+smallIsoY = [
      1,   1,  1;
      0,   0,  0;
     -1,  -1, -1
 ];
 
-% Radius in pixels of simple blur applied to blurImage
-blurAmount = 2;
+% Centre kernel (best, in my experience so far).
+centreKernel = [
+    1,   1,   1;
+    1,   -8,  1;
+    1,   1,   1
+];
 
-% Dry/wet slider for reduced edge blurring when angle of edge is
-% near-vertical or horizontal. Valid range is 0-1.
-angleMixer = 1;
+% Large isotropic kernels.
+largeIsoX = [
+    0.5 1 0 -1 -0.5;
+    0.5 1 0 -1 -0.5;
+    0.5 1 0 -1 -0.5;
+    0.5 1 0 -1 -0.5;
+    0.5 1 0 -1 -0.5;
+];
 
-% Sets strength of sobel
-sobelStrength = 2;
+largeIsoY = [
+    0.50, 0.50, 0.50, 0.50, 0.50;
+    1.00, 1.00, 1.00, 1.00, 1.00;
+    0.00, 0.00, 0.00, 0.00, 0.00;
+    -1.0, -1.0, -1.0, -1.0, -1.0;
+    -0.5, -0.5, -0.5, -0.5, -0.5;
+];
+
+% Adjacent kernels.
+adjacentx = [
+    0.00,   0.00,  0.00;
+    -1.0,   0.00,  1.00;
+    0.00,   0.00,  0.00
+];
+
+adjacenty = [
+    0.00,   1.00,  0.00;
+    0.00,   0.00,  0.00;
+    0.00,   -1.0,  0.00
+];
