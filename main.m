@@ -27,7 +27,7 @@ preprocessblur = 0;
 postprocessblur = 1;
 
 % Brightens the blurred image to preserve highlights.
-brighten = 1.24;
+brighten = 1.22;
 
 % Determines the percentage of sin weighting to be applied to sobel filter
 % output. Range: 0 <= decimal <= 1.
@@ -35,21 +35,21 @@ angleMixer = 0;
 
 % Sets weight of sine of edge angle. A higher value means that the angle of
 % an edge must be further from the horizontal or vertical before a blur
-% will be applied. Range: 0 <= decimal.
+% will be applied. Range: 1 <= decimal.
 sinWeight = 1;
 
 % Sets strength of sobel. Higher value -> greater percentage of blur added
 % to edges. Range: 0 <= decimal.
-edgeDetectStrength = 1.2;
+edgeDetectStrength = 2.2;
 
 % Sets weighting of sobel output.
-edgeDetectWeight = 1;
+edgeDetectWeight = 1.6;
 
 % =========================================================================
 % =========================================================================
 
 % Read source image.
-sourceImage = imread('./testimages/image2.png');
+sourceImage = imread('./testimages/image3.png');
 
 % Compute Post-process blur.
 sourcePostBlurredImage = simpleBlur(brighten .* im2double(sourceImage), postprocessblur);
@@ -61,7 +61,9 @@ grayImage = simpleBlur(im2double(rgb2gray(sourceImage)), preprocessblur);
 xAxisEdge = doKernel(Gx, grayImage);
 yAxisEdge = doKernel(Gy, grayImage);
 combinedAxisEdge = sqrt(xAxisEdge.^2 + yAxisEdge.^2);
-sinAxisEdge = (1 - ((abs(xAxisEdge-yAxisEdge)+eps) ./ ((max(max(xAxisEdge-yAxisEdge)))+eps))) .^ sinWeight;
+difference = (xAxisEdge-yAxisEdge)+eps;
+sinAxisEdge = (1 - ((abs(difference)) ./ ((max(max(difference)))))) .^ sinWeight;
+% sinAxisEdge = sin(2.*atan((yAxisEdge+eps) ./ (xAxisEdge+eps))) .^ sinWeight;
 % This is because the more vertical or horizontal an edge is, the less
 % blurring is needed. (does nothing for omni directional kernels).
 
