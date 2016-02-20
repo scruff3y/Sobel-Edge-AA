@@ -22,4 +22,4 @@ A higher value here 'weights' the angle of the edge towards the higher end of th
 The strength of the detected edges scales linearly with this value.
 
     edgeDetectWeight
-This weights the output of the edge detection by raising to the power of this value.
+This weights the output of the edge detection by raising the normalised edge-detection values to the power of this value. Hence, a detected edge must be closer to 1 to show up properly.
