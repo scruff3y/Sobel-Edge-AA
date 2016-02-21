@@ -14,7 +14,9 @@ How it works:
 Link to imgur albums of before/after because I don't know how to use markdown lol: 
 
 Image 1: http://imgur.com/a/ezSOI
+
 Image 2: http://imgur.com/a/p2SAG
+
 Image 3: http://imgur.com/a/bXGzl
 
 GIF of before and after: https://gfycat.com/AcclaimedGeneralDolphin
