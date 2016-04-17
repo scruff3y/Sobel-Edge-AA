@@ -11,7 +11,7 @@ How it works:
 4. Sobel output is multiplied by a 'strength' factor, normalised to range between 0 and 1, and then raised to the power of a 'weight' variable, so that only well-defined edges are left. Sobel output is also scaled against the *angle* of the edges detected in the image (this is to remove edges which run nearly parallel with the horizontal or vertical, since they do not need blurring).
 5. The filtered copy of the image is made from a combination of the source, and the blurred copy, using the Sobel output to determine how much of the source/blurred is in the final image.
 
-Link to imgur albums of before/after because I don't know how to use markdown lol: 
+Here are some examples of the output produced by these scripts:
 
 Image 1: http://imgur.com/a/ezSOI
 
@@ -22,3 +22,5 @@ Image 3: http://imgur.com/a/bXGzl
 GIF of before and after: https://gfycat.com/AcclaimedGeneralDolphin
 
 As per usual with edge-detect AA, text is *totally* screwed. This is WiP though, so it might be able to be fixed by tweaking.
+
+Screenshots are from Unigine Valley benchmark: https://unigine.com/products/benchmarks/valley/
